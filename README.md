@@ -78,6 +78,12 @@ pytest
 
 ---
 
+## Terminal Output
+
+![Terminal output showing recommendations for the High-Energy Pop Fan profile](screenshot_output.png)
+
+---
+
 ## Experiments Tried
 
 ### Scoring Mode Comparison

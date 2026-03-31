@@ -37,18 +37,31 @@ PROFILES = {
 
 
 def print_table(recommendations, profile_name: str, mode: str) -> None:
-    """Print recommendations as a formatted ASCII table."""
-    header = f"  Profile: {profile_name}  |  Mode: {mode}"
-    print("\n" + "=" * 80)
-    print(header)
-    print("=" * 80)
-    print(f"{'#':<3} {'Title':<30} {'Artist':<18} {'Score':>6}  {'Reasons'}")
-    print("-" * 80)
+    """Print recommendations as a formatted card layout with reasons on separate lines."""
+    print()
+    print("+" + "=" * 68 + "+")
+    print(f"|  {'Profile:':<10} {profile_name:<55} |")
+    print(f"|  {'Mode:':<10} {mode:<55} |")
+    print("+" + "=" * 68 + "+")
+
     for i, (song, score, explanation) in enumerate(recommendations, 1):
-        title = song["title"][:28]
-        artist = song["artist"][:16]
-        print(f"{i:<3} {title:<30} {artist:<18} {score:>6.2f}  {explanation}")
-    print("-" * 80)
+        title = song["title"]
+        artist = song["artist"]
+        genre = song["genre"]
+        energy = song["energy"]
+        mood = song["mood"]
+
+        print(f"|                                                                    |")
+        print(f"|  #{i}  {title:<40} Score: {score:>6.2f}  |")
+        print(f"|       Artist: {artist:<25} Genre: {genre:<15} |")
+        print(f"|       Mood: {mood:<12}  Energy: {energy:<5.2f}                      |")
+        print(f"|       Reasons:                                                     |")
+        reasons = explanation.split("; ")
+        for reason in reasons:
+            print(f"|         - {reason:<57} |")
+        print(f"|  {'':·<66}  |")
+
+    print("+" + "=" * 68 + "+")
 
 
 def main() -> None:
