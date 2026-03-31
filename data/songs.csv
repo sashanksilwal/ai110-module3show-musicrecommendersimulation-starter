@@ -1,11 +1,21 @@
-id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness
-1,Sunrise City,Neon Echo,pop,happy,0.82,118,0.84,0.79,0.18
-2,Midnight Coding,LoRoom,lofi,chill,0.42,78,0.56,0.62,0.71
-3,Storm Runner,Voltline,rock,intense,0.91,152,0.48,0.66,0.10
-4,Library Rain,Paper Lanterns,lofi,chill,0.35,72,0.60,0.58,0.86
-5,Gym Hero,Max Pulse,pop,intense,0.93,132,0.77,0.88,0.05
-6,Spacewalk Thoughts,Orbit Bloom,ambient,chill,0.28,60,0.65,0.41,0.92
-7,Coffee Shop Stories,Slow Stereo,jazz,relaxed,0.37,90,0.71,0.54,0.89
-8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22
-9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78
-10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35
+id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness,popularity,decade,mood_tag
+1,Sunrise City,Neon Echo,pop,happy,0.82,118,0.84,0.79,0.18,74,2020s,uplifting
+2,Midnight Coding,LoRoom,lofi,chill,0.42,78,0.56,0.62,0.71,68,2020s,peaceful
+3,Storm Runner,Voltline,rock,intense,0.91,152,0.48,0.66,0.10,61,2010s,aggressive
+4,Library Rain,Paper Lanterns,lofi,chill,0.35,72,0.60,0.58,0.86,55,2020s,dreamy
+5,Gym Hero,Max Pulse,pop,intense,0.93,132,0.77,0.88,0.05,79,2020s,euphoric
+6,Spacewalk Thoughts,Orbit Bloom,ambient,chill,0.28,60,0.65,0.41,0.92,47,2010s,mysterious
+7,Coffee Shop Stories,Slow Stereo,jazz,relaxed,0.37,90,0.71,0.54,0.89,52,2010s,romantic
+8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22,63,2010s,nostalgic
+9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78,58,2020s,peaceful
+10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35,71,2020s,uplifting
+11,Concrete Jungle,Blaze Koda,hip-hop,intense,0.87,95,0.52,0.84,0.08,85,2010s,aggressive
+12,Velvet Soul,Mara Fontaine,r&b,relaxed,0.55,88,0.76,0.72,0.44,78,2020s,romantic
+13,Moonlight Sonata Reimagined,Elena Vasari,classical,chill,0.22,66,0.68,0.18,0.97,43,2010s,melancholic
+14,Drop the Signal,KRVT,electronic,intense,0.95,140,0.63,0.91,0.03,82,2020s,euphoric
+15,Dirt Road Sermon,Clay Holloway,country,relaxed,0.48,104,0.74,0.59,0.82,67,2010s,nostalgic
+16,Iron Cathedral,Dreadforge,metal,intense,0.97,168,0.22,0.44,0.06,56,2010s,rebellious
+17,Fuego Eterno,Los Vientos,latin,happy,0.84,116,0.89,0.93,0.19,88,2020s,euphoric
+18,Groove Parliament,The Slab Band,funk,happy,0.79,108,0.85,0.90,0.27,62,2000s,uplifting
+19,River Keeper,Asha Wynne,soul,relaxed,0.50,76,0.80,0.61,0.73,70,2010s,melancholic
+20,Kingston Morning,Reef Collective,reggae,chill,0.58,82,0.87,0.77,0.64,65,2000s,peaceful
