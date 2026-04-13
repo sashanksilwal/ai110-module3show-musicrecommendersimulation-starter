@@ -1,121 +1,97 @@
 # Music Recommender Simulation
 
-A Python-based music recommender that scores and ranks songs from a 20-song catalog based on user taste profiles. It supports multiple scoring strategies, a diversity penalty, and transparent explanations for every recommendation.
+This is a small music recommender I built for class. It takes a made-up user taste profile and picks songs from a tiny catalog of 20 tracks. For every song it picks, it also tells you *why* it picked it, which I think is the more interesting part.
 
----
+## What's in here
 
-## How The System Works
+The catalog has 20 songs. I started with the 10 that came in the starter and added 10 more so there'd be a wider mix of genres (hip-hop, R&B, classical, EDM, country, metal, latin, funk, soul, reggae). Each song has the usual stuff like genre, mood, energy, tempo, valence, danceability, and acousticness, plus three extra fields I added: popularity (0 to 100), decade, and a more specific mood tag like "euphoric" or "nostalgic".
 
-### Song Features
-Each song has: genre, mood, energy (0-1), tempo, valence (positivity), danceability, acousticness, popularity (0-100), decade, and a detailed mood tag (e.g., "euphoric", "nostalgic").
+A user profile is just a little dictionary with a favorite genre, favorite mood, a target energy level, whether they like acoustic sounds, an optional preferred decade, and an optional mood tag.
 
-### User Profile
-A user profile stores: favorite genre, favorite mood, target energy level, acoustic preference, preferred decade, and preferred mood tag.
+## How it picks songs
 
-### Algorithm Recipe
-The recommender scores every song in the catalog against the user profile:
+The idea is simple. For every song in the catalog, I check how well it matches the user profile and hand out points:
 
-- **Genre match**: +3.0 points (exact match)
-- **Mood match**: +2.0 points (exact match)
-- **Energy similarity**: up to +1.0 point (proportional to closeness)
-- **Acoustic preference**: up to +1.0 point (high acousticness if user likes acoustic, low if not)
-- **Valence**: +0.5 * valence score
-- **Danceability**: +0.5 * danceability score
-- **Popularity bonus**: +0.3 * (popularity / 100)
-- **Decade match**: +1.0 point
-- **Mood tag match**: +1.5 points
+- Same genre as the user's favorite: +3.0
+- Same mood: +2.0
+- Energy close to the target: up to +1.0, depending on how close
+- Acoustic preference: up to +1.0 (more points for acoustic tracks if the user likes acoustic, fewer if they don't)
+- Valence times 0.5
+- Danceability times 0.5
+- Popularity bonus worth up to +0.3
+- Decade match: +1.0
+- Mood tag match: +1.5
 
-Songs are sorted by score, highest first. A **diversity penalty** reduces scores for songs whose artist or genre already appears in the top results.
+Once every song has a score, I sort them from highest to lowest and return the top 5. There's also a diversity penalty so one artist or one genre doesn't completely take over the list. If the same artist shows up twice in the top 5, the second one gets docked 1.5 points. If a genre shows up more than twice, songs in that genre start losing a point too.
 
-### Scoring Modes
-Four strategies with different weight distributions:
-- **Balanced** (default) — even weighting across all features
-- **Genre-First** — genre match worth 5.0, other features reduced
-- **Mood-First** — mood match worth 5.0, mood tag worth 3.0
-- **Energy-Focused** — energy similarity worth 5.0, danceability boosted
+I also added four scoring modes that change the weights:
 
-### Data Flow
+- **Balanced** is the default and spreads weight across everything
+- **Genre-First** cranks the genre weight way up to 5.0
+- **Mood-First** does the same for mood and also boosts the mood tag
+- **Energy-Focused** makes energy similarity the dominant signal
+
+The data flow is basically: take the user profile, score every song, sort them, apply the diversity penalty, return the top K.
+
+## Getting it running
+
+Make a virtual environment if you want one:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate      # Mac or Linux
+.venv\Scripts\activate         # Windows
 ```
-User Profile → Score every song → Sort by score → Apply diversity penalty → Return top K
+
+Install the dependencies:
+
+```bash
+pip install -r requirements.txt
 ```
 
-### Potential Biases
-- The system might over-prioritize genre since it has the highest base weight
-- Exact string matching means "indie pop" ≠ "pop", missing related genres
-- Small catalog size limits recommendation quality
+Then run it:
 
----
+```bash
+python -m src.main
+```
 
-## Getting Started
-
-### Setup
-
-1. Create a virtual environment (optional but recommended):
-
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate      # Mac or Linux
-   .venv\Scripts\activate         # Windows
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Run the app:
-
-   ```bash
-   python -m src.main
-   ```
-
-### Running Tests
+To run the tests:
 
 ```bash
 pytest
 ```
 
----
+There's also a Streamlit web UI if you want a nicer way to play with it:
 
-## Terminal Output
+```bash
+pip install streamlit
+streamlit run src/app.py
+```
+
+The web UI lets you pick your genre, mood, and energy from the sidebar and see the recommendations update live, with reasons and song details for each pick.
+
+![Streamlit web UI showing the VibeFinder recommender](screenshot_streamlit.png)
+
+## Terminal output
 
 ![Terminal output showing recommendations for the High-Energy Pop Fan profile](screenshot_output.png)
 
----
+## Experiments I tried
 
-## Experiments Tried
+**Switching scoring modes.** I ran the same "High-Energy Pop Fan" profile through all four modes to see what changed. In balanced mode, Sunrise City and Gym Hero took the top two spots like you'd expect. In genre-first mode, the gap between pop songs and everything else got huge (8.03 vs 3.62 for the next song). In mood-first mode, Fuego Eterno jumped to #1 even though it's latin, not pop, because the mood weight was big enough to outweigh the genre mismatch. Energy-focused mode pulled up a bunch of songs into a tight cluster since lots of tracks have similar energy levels.
 
-### Scoring Mode Comparison
-Ran the "High-Energy Pop Fan" profile across all four scoring modes:
-- **Balanced**: Sunrise City #1, Gym Hero #2 — both pop songs ranked highest
-- **Genre-First**: Same top 2 but much larger gap to non-pop songs (8.03 vs 3.62)
-- **Mood-First**: Fuego Eterno (latin/happy) jumped to #1 because mood weight dominated genre
-- **Energy-Focused**: Songs clustered tightly in score since most high-energy songs scored similarly
+**Turning the diversity penalty on and off.** With the chill lofi profile, LoRoom showed up twice in the raw top 5. With the penalty on, the second LoRoom track got pushed down so other artists had room to appear. In this tiny catalog the effect is small but you can see it working.
 
-### Diversity Penalty Test
-Compared results with and without the diversity penalty. In the lofi profile, LoRoom appeared twice — the penalty correctly reduced the second song's ranking to promote variety.
+**A weird edge case.** I made a profile that asks for both high energy (0.95) and a chill mood, which doesn't really make sense together. The system didn't break. It just split the difference and gave a mix of high-energy pop songs and chill tracks, which felt like a reasonable thing to do when the user's preferences contradict themselves.
 
-### Edge Case: Conflicting Preferences
-A profile with high energy (0.95) but chill mood produced a mixed list — the system balanced both signals rather than crashing or ignoring one, showing graceful degradation.
+## Limitations
 
----
-
-## Limitations and Risks
-
-- Only works on a 20-song catalog — too small for real use
-- Does not understand lyrics, language, or cultural context
-- Exact genre matching misses related genres (indie pop ≠ pop)
-- Popularity bonus creates a feedback loop favoring already-popular tracks
-- Single energy/mood values can't capture how taste changes by context (morning vs. workout)
-- Dataset skews toward Western, English-language music from 2010s-2020s
-
----
+The catalog is tiny. 20 songs is enough to demo the idea but nothing close to real use. Because the genre match is an exact string comparison, a fan of "indie pop" gets no credit for regular "pop" songs, which feels wrong. The popularity bonus also creates a bit of a feedback loop where already-popular songs get a small boost, which is exactly the kind of thing that makes real recommender systems homogenize over time. The model doesn't understand lyrics or language at all. And my dataset leans pretty heavily toward Western, English-language music from the 2010s and 2020s, so anyone who likes older music or music from other traditions isn't well served.
 
 ## Reflection
 
-[**Model Card**](model_card.md)
+[Model Card](model_card.md)
 
-Building this recommender showed how sensitive outputs are to weight choices. A small change — like doubling the mood weight — completely reshuffles the ranking. This means the people who set the weights have enormous power over what users discover.
+The thing that surprised me most was how much the output depends on the weights. I can take the exact same song catalog and the exact same user profile, nudge one number, and get a completely different top 5. That's kind of unsettling when you think about it. The person who picks the weights has a lot of power over what users end up hearing, and there's no objectively correct choice.
 
-The project also highlighted how data composition creates implicit bias. With only 1 classical song and 3 pop songs, the system structurally favors pop listeners. Real-world recommenders face the same problem at scale — genres with less training data get worse recommendations, creating a cycle where underrepresented music stays underrepresented. Human oversight in data curation and weight design remains essential even when the algorithm itself is "fair."
+It also made me realize how much bias can sneak in through the data itself, before the algorithm even runs. My catalog has three pop songs and only one classical song, so of course pop listeners get better recommendations. Scale that up to a real service and you can see how genres with less data in the system just stay underrepresented forever. The algorithm isn't doing anything "unfair", it's just reflecting what it was given. That feels like a place where a human still has to pay attention, no matter how clever the model gets.

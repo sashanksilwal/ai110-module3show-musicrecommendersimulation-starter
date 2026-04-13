@@ -2,86 +2,72 @@
 
 ## 1. Model Name
 
-**VibeFinder 1.0**
-
----
+VibeFinder 1.0
 
 ## 2. Intended Use
 
-This system suggests 3-5 songs from a small catalog based on a user's preferred genre, mood, energy level, acoustic preference, decade, and mood tag. It supports multiple scoring strategies (balanced, genre-first, mood-first, energy-focused) and includes a diversity penalty to avoid repetitive recommendations. It is designed for classroom exploration only, not for real users.
-
----
+This is a toy recommender I built for a class assignment. You feed it a little user profile (favorite genre, favorite mood, target energy, whether you like acoustic stuff, and optionally a decade and mood tag) and it picks 5 songs from a 20-song catalog. It also tells you why it picked each one, which is honestly the whole point of the exercise. It's meant for classroom exploration and is definitely not something you'd ship to real users.
 
 ## 3. How the Model Works
 
-The recommender compares each song in the catalog to a user's taste profile. It checks whether the song's genre and mood match the user's favorites, how close the song's energy level is to the user's target, and whether the song has acoustic qualities the user prefers. It also considers popularity, decade, and detailed mood tags.
+For every song in the catalog, the recommender checks how well it lines up with your profile and hands out points. If the genre matches your favorite it gets a big chunk of points. Same for mood. Then it looks at how close the song's energy is to your target and gives partial credit depending on how close. If you said you like acoustic music, acoustic songs get a boost. If you didn't, non-acoustic songs get a boost instead. Smaller points come from valence (how positive the song sounds), danceability, popularity, decade, and a more specific mood tag.
 
-Each matching feature earns points according to configurable weights. For example, in "balanced" mode a genre match is worth 3 points and a mood match is worth 2 points. The energy score is proportional to how close the song's energy is to the target — a perfect match earns the full weight, and a large gap earns close to zero.
+Every song ends up with a total score. The songs get sorted highest to lowest, and the top 5 come out the other end. There's also a little diversity step that docks points from songs when the same artist or genre has already appeared, so one artist can't take over the whole list.
 
-After scoring, all songs are ranked from highest to lowest. A diversity penalty reduces the score of songs whose artist or genre already appears in the top results, preventing the list from being dominated by one sound.
-
----
+There are four different "modes" you can pick from, and they just change the weights. Balanced spreads things out. Genre-first makes the genre match worth way more than anything else. Mood-first does the same for mood. Energy-focused leans heavily on matching the energy level. Same data, different priorities.
 
 ## 4. Data
 
-The catalog contains 20 songs in `data/songs.csv`. The original 10 songs covered pop, lofi, rock, ambient, jazz, synthwave, and indie pop. Ten additional songs were added to cover hip-hop, R&B, classical, electronic/EDM, country, metal, latin, funk, soul, and reggae.
+The catalog lives in `data/songs.csv` and has 20 songs. The starter came with 10, and I added 10 more to get a wider mix. The 20 now cover pop, lofi, rock, ambient, jazz, synthwave, indie pop, hip-hop, R&B, classical, electronic, country, metal, latin, funk, soul, and reggae.
 
-Each song has numerical features (energy, tempo, valence, danceability, acousticness), categorical features (genre, mood), and extended features (popularity 0-100, decade, and a detailed mood tag like "euphoric" or "nostalgic").
+Each song has numerical features like energy, tempo, valence, danceability, and acousticness, plus categorical ones like genre and mood. I also added three more fields: a popularity score from 0 to 100, a decade, and a detailed mood tag like "euphoric" or "nostalgic".
 
-The dataset mostly reflects mainstream Western music tastes. Genres like K-pop, Afrobeats, and Bollywood are absent. The catalog is too small to represent the diversity of any single genre.
-
----
+The dataset leans pretty heavily toward mainstream Western music. There's no K-pop, no Afrobeats, no Bollywood, nothing in languages I don't listen to. And with only 20 songs, even the genres that are represented only get one or two tracks, so the catalog is really just a tiny slice.
 
 ## 5. Strengths
 
-- For users with clear preferences (e.g., "chill lofi" or "intense rock"), the top results feel accurate and intuitive.
-- The explanation system makes the scoring transparent — users can see exactly why each song was recommended and how many points each feature contributed.
-- Multiple scoring modes let users explore different ranking philosophies without changing the data.
-- The diversity penalty prevents the same artist from flooding the top results.
+When the user profile is clear and unambiguous, the top results actually feel right. The chill lofi listener gets lofi songs. The intense rock lover gets Storm Runner at the top. The jazz and soul profile gets Coffee Shop Stories. That part works.
 
----
+The explanations are probably the best feature. You can see exactly why each song was picked and how many points came from each feature. There's no mystery to any of it, which is nice for a classroom project where the whole idea is understanding how recommenders make decisions.
+
+Having four scoring modes also makes it easy to see how the weights shape the output, without having to touch any code.
 
 ## 6. Limitations and Bias
 
-- With only 20 songs, many user profiles will see the same songs repeatedly. A real system needs thousands of tracks.
-- The scoring treats genre as an exact string match. A user who likes "indie pop" gets no credit for "pop" songs, even though the genres are closely related.
-- The system does not understand lyrics, language, or cultural context. It cannot distinguish between a happy English pop song and a happy Spanish pop song beyond the genre label.
-- Popularity is used as a bonus, which biases the system toward well-known tracks and could create a "filter bubble" where popular songs get recommended more, becoming even more popular.
-- Energy and mood preferences are single values. Real listeners' tastes vary by time of day, activity, and emotional state.
-- The dataset over-represents 2010s and 2020s music, so users who prefer older music get fewer matches.
+The catalog is way too small. With only 20 songs, most profiles will keep seeing the same handful of tracks. A real recommender needs thousands or millions.
 
----
+Genre matching is exact string comparison, which feels wrong. Someone who likes "indie pop" gets zero points for a regular "pop" song, even though those two things are obviously related. In reality genres should have some kind of similarity score, not a yes or no answer.
+
+The model has no idea what lyrics are, what language a song is in, or what culture it comes from. A happy pop song in English and a happy pop song in Spanish look identical to it except for the genre label.
+
+The popularity bonus is a bit of a trap. Already-popular songs get a tiny edge, and in a real system that kind of thing creates feedback loops where popular stuff keeps getting recommended and everything else gets buried.
+
+Energy and mood are single numbers, but real taste isn't like that. What you want in the morning is different from what you want at the gym or what you want when you're falling asleep. None of that is captured.
+
+And the dataset is skewed toward music from the 2010s and 2020s, so anyone who mostly listens to older stuff is going to get worse recommendations than someone whose taste happens to match what I put in the CSV.
 
 ## 7. Evaluation
 
-Five user profiles were tested:
-1. **High-Energy Pop Fan** — correctly ranked "Sunrise City" and "Gym Hero" at the top.
-2. **Chill Lofi Listener** — correctly ranked lofi tracks highest, with acoustic songs also scoring well.
-3. **Intense Rock Lover** — "Storm Runner" ranked first with a high score (10.14), as expected.
-4. **Mellow Jazz & Soul** — "Coffee Shop Stories" ranked first. Other relaxed/acoustic songs followed logically.
-5. **Edge Case (High Energy + Chill Mood)** — produced mixed results, showing the system can handle conflicting preferences by balancing both signals rather than failing.
+I didn't calculate any fancy metrics, I just tried a bunch of user profiles and looked at whether the results made sense.
 
-A scoring mode comparison showed that switching from "balanced" to "mood-first" caused "Fuego Eterno" (a happy latin song) to jump to #1, ahead of the pop songs. This confirmed that the weights meaningfully change rankings.
+I tested five profiles: a high-energy pop fan, a chill lofi listener, an intense rock lover, a mellow jazz and soul listener, and a weird edge case that asked for high energy and a chill mood at the same time. The first four all produced top results that I thought looked right. The edge case was interesting because it's a contradictory profile and the system didn't crash, it just gave a mixed list that split the difference between the two signals.
 
-The diversity penalty was tested by running with and without it — in this catalog the effect was modest since few artists have multiple songs, but it correctly penalized LoRoom's second appearance in the lofi profile results.
+I also ran the pop fan profile through all four scoring modes to see what changed. In balanced mode, two pop songs took the top spots. In mood-first mode, a latin song jumped to #1 because the mood match was weighted heavily enough to beat the genre mismatch. That was a good sanity check that the weights actually do what I thought they did.
 
----
+Finally I ran the lofi profile with and without the diversity penalty to see if repeat artists got pushed down. They did, so the penalty works, even if the effect is small in such a tiny catalog.
 
 ## 8. Future Work
 
-- Add support for multi-genre preferences (e.g., a user who likes both jazz and lofi).
-- Implement collaborative filtering — "users who liked X also liked Y."
-- Add a diversity slider so users can control how varied vs. focused their recommendations are.
-- Support time-of-day context (morning = low energy, workout = high energy).
-- Expand the catalog to 100+ songs to make the diversity penalty more impactful.
-- Add fuzzy genre matching so "indie pop" partially matches "pop."
+There's a lot I'd want to try if I had more time. Fuzzy genre matching is probably the first thing so that "indie pop" and "pop" share some similarity. Multi-genre user preferences would be good too, because nobody only listens to one genre.
 
----
+Collaborative filtering would be a huge step up, where instead of comparing songs to profiles, the system learns from what similar users liked. A diversity slider so users can choose between "give me exactly what I asked for" and "surprise me a little" would be nice. Time-of-day context, where the system knows that morning you and workout you want different things, would make it feel much more alive.
+
+And honestly just a bigger catalog. A lot of the current limitations go away once there are a few hundred songs instead of twenty.
 
 ## 9. Personal Reflection
 
-Building this recommender revealed how much a simple scoring system's behavior depends on the weights assigned to each feature. Doubling the genre weight makes the system feel like a genre filter; doubling the mood weight makes it feel like a playlist curator. Neither is objectively "right" — the choice reflects a design value about what matters most.
+The thing I didn't expect is how much the output depends on the weights. Same songs, same user, nudge one number, and the top 5 is completely different. That's kind of unsettling. Whoever picks the weights has a huge amount of control over what people end up listening to, and there's no objectively correct answer. It's a design choice that looks like a technical one.
 
-The most surprising finding was how much the small dataset size affects perceived quality. With only 20 songs, even a well-tuned algorithm produces lists where 3 out of 5 songs feel like compromises. This highlights why real recommender systems need massive catalogs.
+The other thing that stuck with me is how bias creeps in through the data before the algorithm even runs. I have three pop songs and one classical song, so of course pop listeners get better recommendations. That's not the algorithm being unfair, it's the data being unbalanced. Scale that up to a real service and you can see how entire genres or communities get underrepresented and just stay that way.
 
-This exercise also made clear how easily bias creeps in through data composition. If the catalog has 3 pop songs and 1 classical song, the system will appear to "prefer" pop simply because there are more candidates to match. Human judgment is still essential for curating training data, setting weights, and deciding when algorithmic recommendations should be overridden.
+It changed how I think about recommender apps. When Spotify or YouTube suggests something, there's a human somewhere who decided which features to use, what weights to give them, what data to train on, and what counts as a "good" recommendation. Those decisions are invisible but they shape everything. That feels like a place where human judgment still really matters, even when the model looks smart.
